@@ -6,7 +6,7 @@ if(!empty($_POST['messageId']) && !empty($_POST['openid'])){
 $m = new mongoClient('mongodb://127.0.0.1', array());
 $db = $m->star;
 $collection = $db->users;
-$doc = array('messageid' => $_POST['messageId'], 'openid' => $_POST['openid'], 'updatedate' => date('d'), 'updatestatus' => false, 'updatetime'=> time());
+$doc = array('messageid' => $_POST['messageId'], 'openid' => $_POST['openid'], 'updatedate' => date('d'), 'updatestatus' => '1', 'updatetime'=> time());
 $collection->insert($doc);
 echo 'success';
 }
