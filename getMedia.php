@@ -43,5 +43,4 @@ function createCurl ($url,$param)
 	$httpInfo = curl_getinfo($curl);
 	curl_close($curl);
 	return json_decode($response, true);
-       // var_dump($response);
 }
