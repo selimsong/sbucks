@@ -8,6 +8,11 @@ $db = $m->star;
 $collection = $db->users;
 $doc = array('messageid' => $_POST['messageId'], 'openid' => $_POST['openid'], 'updatedate' => date('d'), 'updatestatus' => '1', 'updatetime'=> time());
 $collection->insert($doc);
+
+$client = new GearmanClient();
+$client->addServer();
+$client->doBackground('media', $_POST['messageId']);
+
 echo 'success';
 }
 
