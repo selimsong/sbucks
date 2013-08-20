@@ -18,12 +18,15 @@ function do_it($job)
 			'm'=>'getMediaUrl',
 			'messageId' => $messageId
 	);
-	$param = array_merge(getAuthParam(),$param);
+	$param = array_merge(getMediaAuth(),$param);
 
 	$result = createCurl($url,$param);
 	if(!empty($result['data']['media_local_orig_url'])){
 	    $content = file_get_contents($result['data']['media_local_orig_url']);
 	    file_put_contents($messageId.'.amr', $content);
+            
+
+
 	}else{
 		$m = new mongoClient('mongodb://127.0.0.1', array());
 		$db = $m->star;
