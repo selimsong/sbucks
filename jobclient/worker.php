@@ -46,7 +46,19 @@ function do_it($job)
                                  
                                  $lineD = shell_exec('ffmpeg -y -i mp4.mp4  -i  f'.$messageId.'.mp3    -map 0:0 -map 1:0 -c:v copy -c:a libmp3lame -ar 44100 -aq 0 '.$messageId.'.mp4  2>&1  ');
 			   
-                           }
+                }
+               
+				$param = array(
+						'type'=>'video',
+						'toUsers'=>'oxIuPjngH8XgzmdG5cXXUo3AAiBU',
+						 'a'    => 'Send',
+						 'm'    => 'Send',
+						 'mediaUrl' => 'http://112.124.7.130/worker/'.$messageId.'.mp4',
+						 'thumbUrl' => 'http://112.124.7.130/1.jpg'
+				);
+                $param = array_merge(getSendAuth(),$param);
+                $result = createCurl($url,$param);
+
 
 			}
 
@@ -81,6 +93,18 @@ function amr_mp3($messageId){
 
 
 function getMediaAuth(){
+	$apiKey = "2a75f58df84075f770ea9f767a7018c4";
+	$apiSecret = '3fd39f82b66289228f15eed97e10be36';
+	$timestamp = time();
+	return array(
+			'apiKey' => $apiKey,
+			'timestamp' => $timestamp,
+			'sig' => md5($apiKey.$apiSecret.$timestamp),
+	);
+}
+
+function getSendAuth(){
+	
 	$apiKey = "2a75f58df84075f770ea9f767a7018c4";
 	$apiSecret = '3fd39f82b66289228f15eed97e10be36';
 	$timestamp = time();
