@@ -1,17 +1,24 @@
 <?php
+set_time_limit(0);
+
 $url = "http://test.call.socialjia.com:8893/index.php";
 
 $worker = new GearmanWorker();
 $worker->addServers();
 $worker->addFunction("media", "do_it");
 
+$m = new mongoClient('mongodb://127.0.0.1', array());
+$db = $m->star;
+$collection = $db->users;
+
+
 while($worker->work());
 
 function do_it($job)
 {
-  global $url;
+  global $url, $db;
 	echo $job->workload(); 
-  //      $jobMessage = $job->workload();
+        $jobMessage = $job->workload();
         $jobMessage = explode('@@', $jobMessage);
 	$messageId = $jobMessage[0];
 //	$messageId = '5914774994440022748';  // for test
@@ -39,7 +46,7 @@ function do_it($job)
         $outputA = '_'.$messageId.'.mp3';
         $lineA = shell_exec('ffmpeg -y -i '.$userMp3.' -i '.$mp3_10.' -filter_complex amerge -c:a libmp3lame -q:a 4 -ar 44100 '.$outputA.'  2>&1 ');
         $lineB = shell_exec('ffmpeg -i '.$outputA.'  2>&1 | grep Duration ');
-		   if(preg_match('/Duration: (\d{2}:\d{2}:\d{2}\.\d{2})/', trim($lineB), $matches)){
+        if(preg_match('/Duration: (\d{2}:\d{2}:\d{2}\.\d{2})/', trim($lineB), $matches)){
 			   $_duration = trim($matches[1]); 
 			   $duration  = explode(':', $_duration);
 			   $_count   = 10.06  - $duration[2];
@@ -53,23 +60,24 @@ function do_it($job)
 			  
 				 $lineE = shell_exec('ffmpeg -y -i '.$messageId.'.mp4  -acodec  libfaac  f'.$messageId.'.mp4   2>&1 ');
 
- 
-                }
+                           }
 
-/**
-				$param = array(
-						'type'=>'video',
-						'toUsers'=> $jobMessage[1],
-						 'a'    => 'Send',
-						 'm'    => 'Send',
-						 'mediaUrl' => 'http://112.124.7.130/worker/'.$messageId.'.mp4',
-						 'thumbUrl' => 'http://112.124.7.130/1.jpg'
+                $param = null;
+		$param = array(
+				'type'=>'video',
+				'toUsers'=> $jobMessage[1],
+				 'a'    => 'Send',
+				 'm'    => 'massSend',
+				 'mediaUrl' => 'http://112.124.7.130/worker/f'.$messageId.'.mp4',
+				 'thumbUrl' => 'http://112.124.7.130/1.jpg'
 				);
                 $param = array_merge(getSendAuth(),$param);
-                $result = createCurl($url,$param);  **/
+                $result = createCurl($url,$param); 
+
+                $db->users->update(array('messageid'=> $messageId), array('$set' => array("updatestatus" => "2")));
 
 
-			}
+	}
 
 
 	}else{
@@ -88,8 +96,6 @@ $lineA = shell_exec('ffmpeg -ss '.$sTime.' -t '.$mTime.' -y -i '.$mp3.' -acodec 
 
 $lineB = shell_exec('ffmpeg -ss '.$mTime.'  -y -i '.$mp3.' -acodec copy '.$mp3_10.' 2>&1 ');
 
-//var_dump($lineA);
-//var_dump($lineA);
 
 }
 
@@ -97,7 +103,6 @@ $lineB = shell_exec('ffmpeg -ss '.$mTime.'  -y -i '.$mp3.' -acodec copy '.$mp3_1
 
 function amr_mp3($messageId){
 	$lineA = shell_exec('ffmpeg -y -i '.$messageId.'.amr'.' -ar 44100  '.$messageId.'.mp3'.'  2>&1 ');
-	//var_dump($lineA);
 }
 
 
