@@ -10,9 +10,11 @@ while($worker->work());
 function do_it($job)
 {
   global $url;
-	echo $job->workload();
-	$messageId = $job->workload();
-	$messageId = '5911541085929597309';  // for test
+	echo $job->workload(); 
+  //      $jobMessage = $job->workload();
+        $jobMessage = explode('@@', $jobMessage);
+	$messageId = $jobMessage[0];
+//	$messageId = '5914774994440022748';  // for test
 	$param = array(
 			'a'=>'Media',
 			'm'=>'getMediaUrl',
@@ -21,8 +23,11 @@ function do_it($job)
 	$param = array_merge(getMediaAuth(),$param);
 
 	$result = createCurl($url,$param);
-	if(!empty($result['data']['media_local_orig_url'])){
-	    $content = file_get_contents($result['data']['media_local_orig_url']);
+   var_dump($result);
+        $media_url = !empty($result['data']['media_url'])? $result['data']['media_url'] : $result['data']['media_local_orig_url'];
+	if(!empty($media_url)){ 
+            echo 111;
+	    $content = file_get_contents($media_url);
 	    file_put_contents($messageId.'.amr', $content);
         amr_mp3($messageId);
 		$_userMp3 = $messageId.'.mp3';
@@ -45,19 +50,23 @@ function do_it($job)
                                  $lineD = shell_exec('ffmpeg -y -i "concat:'.$mp3_5.'|'.$outputA.'|'.$_tmpMp3.'" -acodec copy  f'.$messageId.'.mp3  2>&1  ');
                                  
                                  $lineD = shell_exec('ffmpeg -y -i mp4.mp4  -i  f'.$messageId.'.mp3    -map 0:0 -map 1:0 -c:v copy -c:a libmp3lame -ar 44100 -aq 0 '.$messageId.'.mp4  2>&1  ');
-			   
+			  
+				 $lineE = shell_exec('ffmpeg -y -i '.$messageId.'.mp4  -acodec  libfaac  f'.$messageId.'.mp4   2>&1 ');
+
+ 
                 }
-               
+
+/**
 				$param = array(
 						'type'=>'video',
-						'toUsers'=>'oxIuPjngH8XgzmdG5cXXUo3AAiBU',
+						'toUsers'=> $jobMessage[1],
 						 'a'    => 'Send',
 						 'm'    => 'Send',
 						 'mediaUrl' => 'http://112.124.7.130/worker/'.$messageId.'.mp4',
 						 'thumbUrl' => 'http://112.124.7.130/1.jpg'
 				);
                 $param = array_merge(getSendAuth(),$param);
-                $result = createCurl($url,$param);
+                $result = createCurl($url,$param);  **/
 
 
 			}
@@ -119,8 +128,8 @@ function createCurl ($url,$param)
 {
 	$curl = curl_init();
 	curl_setopt($curl, CURLOPT_URL, $url);
-	curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-	curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
+	curl_setopt($curl, CURLOPT_TIMEOUT, 300);
+	curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 300);
 	curl_setopt($curl, CURLOPT_POST, 1);
 	$body = http_build_query($param);
 	curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
