@@ -18,8 +18,8 @@ function do_it($job)
 {
   global $url, $db;
 	 
-    $jobMessage = $job->workload();
-    $jobMessage = explode('@@', $jobMessage);
+        $jobMessage = $job->workload();
+        $jobMessage = explode('@@', $jobMessage);
 	$messageId = $jobMessage[0];
 //	$messageId = '5914774994440022748';  // for test
 	$param = array(
