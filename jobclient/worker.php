@@ -17,9 +17,9 @@ while($worker->work());
 function do_it($job)
 {
   global $url, $db;
-	echo $job->workload(); 
-        $jobMessage = $job->workload();
-        $jobMessage = explode('@@', $jobMessage);
+	 
+    $jobMessage = $job->workload();
+    $jobMessage = explode('@@', $jobMessage);
 	$messageId = $jobMessage[0];
 //	$messageId = '5914774994440022748';  // for test
 	$param = array(
@@ -30,10 +30,10 @@ function do_it($job)
 	$param = array_merge(getMediaAuth(),$param);
 
 	$result = createCurl($url,$param);
-   var_dump($result);
-        $media_url = !empty($result['data']['media_url'])? $result['data']['media_url'] : $result['data']['media_local_orig_url'];
+    var_dump($result);
+    $media_url = !empty($result['data']['media_url'])? $result['data']['media_url'] : $result['data']['media_local_orig_url'];
 	if(!empty($media_url)){ 
-            echo 111;
+           
 	    $content = file_get_contents($media_url);
 	    file_put_contents($messageId.'.amr', $content);
         amr_mp3($messageId);
@@ -52,33 +52,32 @@ function do_it($job)
 			   $_count   = 10.06  - $duration[2];
 			   $_tmpMp3 = 't'.$messageId.'.mp3';
 			   if($_count > 0){
+
 				 $lineC = shell_exec('ffmpeg -ss '.$duration[2].'  -y -i '.$mp3_10.' -acodec copy '.$_tmpMp3.' 2>&1 ');
-				  
-                                 $lineD = shell_exec('ffmpeg -y -i "concat:'.$mp3_5.'|'.$outputA.'|'.$_tmpMp3.'" -acodec copy  f'.$messageId.'.mp3  2>&1  ');
+
+                 $lineD = shell_exec('ffmpeg -y -i "concat:'.$mp3_5.'|'.$outputA.'|'.$_tmpMp3.'" -acodec copy  f'.$messageId.'.mp3  2>&1  ');
                                  
-                                 $lineD = shell_exec('ffmpeg -y -i mp4.mp4  -i  f'.$messageId.'.mp3    -map 0:0 -map 1:0 -c:v copy -c:a libmp3lame -ar 44100 -aq 0 '.$messageId.'.mp4  2>&1  ');
+                 $lineD = shell_exec('ffmpeg -y -i mp4.mp4  -i  f'.$messageId.'.mp3    -map 0:0 -map 1:0 -c:v copy -c:a libmp3lame -ar 44100 -aq 0 '.$messageId.'.mp4  2>&1  ');
 			  
 				 $lineE = shell_exec('ffmpeg -y -i '.$messageId.'.mp4  -acodec  libfaac  f'.$messageId.'.mp4   2>&1 ');
 
-                           }
+                }
 
                 $param = null;
-		$param = array(
-				'type'=>'video',
-				'toUsers'=> $jobMessage[1],
-				 'a'    => 'Send',
-				 'm'    => 'massSend',
-				 'mediaUrl' => 'http://112.124.7.130/worker/f'.$messageId.'.mp4',
-				 'thumbUrl' => 'http://112.124.7.130/1.jpg'
+		        $param = array(
+					'type'=>'video',
+					'toUsers'=> $jobMessage[1],
+					 'a'    => 'Send',
+					 'm'    => 'massSend',
+					 'mediaUrl' => 'http://112.124.7.130/worker/f'.$messageId.'.mp4',
+					 'thumbUrl' => 'http://112.124.7.130/1.jpg'
 				);
                 $param = array_merge(getSendAuth(),$param);
                 $result = createCurl($url,$param); 
 
                 $db->users->update(array('messageid'=> $messageId), array('$set' => array("updatestatus" => "2")));
 
-
-	}
-
+		}
 
 	}else{
 		$m = new mongoClient('mongodb://127.0.0.1', array());
@@ -95,11 +94,7 @@ function split_mp3($sTime, $mTime, $eTime, $mp3, $mp3_5, $mp3_10){
 $lineA = shell_exec('ffmpeg -ss '.$sTime.' -t '.$mTime.' -y -i '.$mp3.' -acodec copy '.$mp3_5.'  2>&1 ');
 
 $lineB = shell_exec('ffmpeg -ss '.$mTime.'  -y -i '.$mp3.' -acodec copy '.$mp3_10.' 2>&1 ');
-
-
 }
-
-
 
 function amr_mp3($messageId){
 	$lineA = shell_exec('ffmpeg -y -i '.$messageId.'.amr'.' -ar 44100  '.$messageId.'.mp3'.'  2>&1 ');
